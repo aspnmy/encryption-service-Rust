@@ -87,4 +87,7 @@ impl CacheManager {
     }
 
     /// 获取当前缓存文件路径
-   
+    fn get_current_cache_file(&self) -> String {
+        let timestamp = self.get_current_timestamp();
+        let file_name = format!("{}_{}.jsonl", self.temp_file_prefix, timestamp / self.update_interval);
+        format!("{}/{}
