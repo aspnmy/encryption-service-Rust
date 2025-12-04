@@ -19,10 +19,9 @@ RUN cargo fetch
 # 复制实际的源代码
 COPY src ./src
 
-# 在构建阶段设置必要的环境变量，但不包含敏感信息
+# 在构建阶段设置必要的环境变量，不包含敏感信息
 ENV CRUD_API_WRITE_INSTANCE_URL=http://localhost:8000
 ENV CRUD_API_READ_INSTANCE_URL=http://localhost:8000
-ENV JWT_SECRET=temp_build_secret
 
 # 构建发布版本，cargo build本身只会编译代码，不会运行测试或可执行文件
 RUN cargo build --release
@@ -39,10 +38,10 @@ COPY --from=builder /app/target/release/encryption-service /usr/local/bin/encryp
 # 设置环境变量
 ENV RUST_LOG=info
 # 实际运行的时候再进行配置
-# ENV CRUD_API_BACKEND_TYPE=read_write_split
-# ENV CRUD_API_WRITE_INSTANCE_URL=http://10.168.3.165:7981
-# ENV CRUD_API_READ_INSTANCE_URL=http://10.168.3.165:7982
-# ENV JWT_SECRET=a1v0t7BjeTPKjQgeQMummRWEfJmc8sY1
+# ENV CRUD_API_BACKEND_TYPE=
+# ENV CRUD_API_WRITE_INSTANCE_URL=http://localhost:7981
+# ENV CRUD_API_READ_INSTANCE_URL=http://localhost:7982
+# ENV JWT_SECRET=
 
 # 暴露端口
 EXPOSE 9999

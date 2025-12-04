@@ -61,12 +61,12 @@ jobs:
           file: ./Dockerfile
           # 只有推送到main或master分支时才推送镜像
           push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
-          # 构建时始终使用本地标签，推送时使用ghcr.io标签
+          # 构建时使用本地标签，推送时使用ghcr.io标签
           tags: |
-            encryption-service:latest
             ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:latest', env.LOWERCASE_REPOSITORY) }}
             ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.SHA_SHORT) }}
             ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.VERSION) }}
+            encryption-service:local
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           build-args: |
