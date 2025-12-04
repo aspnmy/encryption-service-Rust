@@ -251,7 +251,7 @@ impl AppConfig {
         let config = Self {
             server: ServerConfig {
                 host: env::var("SERVER_HOST").unwrap_or("0.0.0.0".to_string()),
-                port: env::var("SERVER_PORT").unwrap_or("8080".to_string()).parse()?,
+                port: env::var("SERVER_PORT").unwrap_or("9999".to_string()).parse()?,
                 https: env::var("HTTPS").unwrap_or("false".to_string()).parse()?,
             },
             jwt: JwtConfig {

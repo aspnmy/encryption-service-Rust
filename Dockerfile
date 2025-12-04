@@ -1,5 +1,5 @@
 # 使用官方的Rust镜像作为基础镜像
-FROM rust:1.81.0 AS builder
+FROM docker.io/library/rust:1.91.1-slim AS builder
 
 # 设置工作目录
 WORKDIR /app
@@ -32,11 +32,11 @@ COPY --from=builder /app/target/release/encryption-service /usr/local/bin/encryp
 ENV RUST_LOG=info
 ENV CRUD_API_BACKEND_TYPE=read_write_split
 ENV CRUD_API_WRITE_INSTANCE_URL=http://10.168.3.165:7981
-ENV CRUD_API_READ_INSTANCE_URL=http://10.168.3.168:7982
+ENV CRUD_API_READ_INSTANCE_URL=http://10.168.3.165:7982
 ENV JWT_SECRET=12345678901234567890
 
 # 暴露端口
-EXPOSE 8080
+EXPOSE 9999
 
 # 设置入口点
 ENTRYPOINT ["/usr/local/bin/encryption-service"]

@@ -1,0 +1,65 @@
+## 环境变量配置
+
+### 核心配置
+
+# | 变量名 | 描述 | 必填 | 默认值 |
+# |--------|------|------|--------|
+# | `CRUD_API_BACKEND_TYPE` | 后端类型：single/read_write_split/load_balance | 否 | read_write_split |
+# | `CRUD_API_WRITE_INSTANCE_URL` | 写实例 URL | 是 | - |
+# | `CRUD_API_READ_INSTANCE_URL` | 读实例 URL | 否 | 与写实例相同 |
+# | `JWT_SECRET` | JWT 密钥 | 是 | - |
+
+# ### 单容器模式配置
+
+# | 变量名 | 描述 | 默认值 |
+# |--------|------|--------|
+# | `CRUD_API_WRITE_INSTANCE_TIMEOUT` | 写实例超时时间（毫秒） | 5000 |
+# | `CRUD_API_WRITE_INSTANCE_RETRIES` | 写实例重试次数 | 3 |
+
+# ### 读写分离模式配置
+
+# | 变量名 | 描述 | 默认值 |
+# |--------|------|--------|
+# | `CRUD_API_WRITE_INSTANCE_TIMEOUT` | 写实例超时时间（毫秒） | 5000 |
+# | `CRUD_API_WRITE_INSTANCE_RETRIES` | 写实例重试次数 | 3 |
+# | `CRUD_API_READ_INSTANCE_TIMEOUT` | 读实例超时时间（毫秒） | 5000 |
+# | `CRUD_API_READ_INSTANCE_RETRIES` | 读实例重试次数 | 3 |
+
+# ### 负载均衡模式配置
+
+# | 变量名 | 描述 | 默认值 |
+# |--------|------|--------|
+# | `CRUD_API_INSTANCE_{N}_ID` | 第 N 个实例 ID | - |
+# | `CRUD_API_INSTANCE_{N}_URL` | 第 N 个实例 URL | - |
+# | `CRUD_API_INSTANCE_{N}_TYPE` | 第 N 个实例类型：read/write/mixed | mixed |
+# | `CRUD_API_INSTANCE_{N}_TIMEOUT` | 第 N 个实例超时时间（毫秒） | 5000 |
+# | `CRUD_API_INSTANCE_{N}_RETRIES` | 第 N 个实例重试次数 | 3 |
+
+# ### 其他配置
+
+# | 变量名 | 描述 | 默认值 |
+# |--------|------|--------|
+# | `SERVER_HOST` | 服务器地址 | 0.0.0.0 |
+# | `SERVER_PORT` | 服务器端口 | 9999 |
+# | `HTTPS` | 是否启用 HTTPS | false |
+# | `JWT_EXPIRES_IN` | JWT 过期时间（秒） | 3600 |
+# | `JWT_REFRESH_IN` | JWT 刷新时间（秒） | 86400 |
+# | `ENCRYPTION_ALGORITHM` | 加密算法 | aes-256-gcm |
+# | `ENCRYPTION_KEY_LENGTH` | 密钥长度 | 32 |
+# | `ENCRYPTION_ITERATIONS` | 迭代次数 | 100000 |
+# | `ENCRYPTION_SALT` | 加密盐值 | default_salt |
+# | `SERVICE_ROLE` | 服务角色：encrypt/decrypt/mixed | mixed |
+# | `SERVICE_ID` | 服务 ID | encryption-01 |
+# | `WECHAT_WEBHOOK_URL` | 企业微信群机器人 URL | - |
+
+services:
+    encryption-service:
+        container_name: encryption-service-rw
+        ports:
+            - '9999:9999'
+        environment:
+            - CRUD_API_BACKEND_TYPE=${CRUD_API_BACKEND_TYPE}
+            - CRUD_API_WRITE_INSTANCE_URL=${CRUD_API_WRITE_INSTANCE_URL}
+            - CRUD_API_READ_INSTANCE_URL=${CRUD_API_READ_INSTANCE_URL}
+            - JWT_SECRET=${JWT_SECRET}
+        image: encryption-service-rust:latest

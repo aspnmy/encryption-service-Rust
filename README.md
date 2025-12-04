@@ -80,7 +80,7 @@ docker build -t encryption-service .
 ```bash
 docker run -d \
   --name encryption-service-single \
-  -p 8080:8080 \
+  -p 9999:9999 \
   -e CRUD_API_BACKEND_TYPE=single \
   -e CRUD_API_WRITE_INSTANCE_URL=http://crudapi:8000 \
   -e JWT_SECRET=your_jwt_secret \
@@ -92,7 +92,7 @@ docker run -d \
 ```bash
 docker run -d \
   --name encryption-service-rw \
-  -p 8080:8080 \
+  -p 9999:9999 \
   -e CRUD_API_BACKEND_TYPE=read_write_split \
   -e CRUD_API_WRITE_INSTANCE_URL=http://10.168.3.165:7981 \
   -e CRUD_API_READ_INSTANCE_URL=http://10.168.3.168:7982 \
@@ -105,7 +105,7 @@ docker run -d \
 ```bash
 docker run -d \
   --name encryption-service-lb \
-  -p 8080:8080 \
+  -p 9999:9999 \
   -e CRUD_API_BACKEND_TYPE=load_balance \
   -e CRUD_API_INSTANCE_0_ID=instance-01 \
   -e CRUD_API_INSTANCE_0_URL=http://crudapi-01:8000 \
@@ -159,7 +159,7 @@ docker run -d \
 | 变量名 | 描述 | 默认值 |
 |--------|------|--------|
 | `SERVER_HOST` | 服务器地址 | 0.0.0.0 |
-| `SERVER_PORT` | 服务器端口 | 8080 |
+| `SERVER_PORT` | 服务器端口 | 9999 |
 | `HTTPS` | 是否启用 HTTPS | false |
 | `JWT_EXPIRES_IN` | JWT 过期时间（秒） | 3600 |
 | `JWT_REFRESH_IN` | JWT 刷新时间（秒） | 86400 |
