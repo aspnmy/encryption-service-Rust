@@ -1,6 +1,12 @@
 # 使用官方的Rust镜像作为基础镜像
 FROM docker.io/library/rust:1.91.1-slim AS builder
 
+# 安装必要的依赖：pkg-config和OpenSSL开发包
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # 设置工作目录
 WORKDIR /app
 
