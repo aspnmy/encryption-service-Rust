@@ -38,10 +38,11 @@ COPY --from=builder /app/target/release/encryption-service /usr/local/bin/encryp
 
 # 设置环境变量
 ENV RUST_LOG=info
-ENV CRUD_API_BACKEND_TYPE=read_write_split
-ENV CRUD_API_WRITE_INSTANCE_URL=http://10.168.3.165:7981
-ENV CRUD_API_READ_INSTANCE_URL=http://10.168.3.165:7982
-ENV JWT_SECRET=a1v0t7BjeTPKjQgeQMummRWEfJmc8sY1
+# 实际运行的时候再进行配置
+# ENV CRUD_API_BACKEND_TYPE=read_write_split
+# ENV CRUD_API_WRITE_INSTANCE_URL=http://10.168.3.165:7981
+# ENV CRUD_API_READ_INSTANCE_URL=http://10.168.3.165:7982
+# ENV JWT_SECRET=a1v0t7BjeTPKjQgeQMummRWEfJmc8sY1
 
 # 暴露端口
 EXPOSE 9999
