@@ -73,8 +73,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ lower(github.repository) }}:latest
-            ghcr.io/${{ lower(github.repository) }}:${{ github.sha }}
-            ghcr.io/${{ lower(github.repository) }}:${{ env.VERSION }}
+            ghcr.io/${{ lower(trim(github.repository)) }}:latest
+            ghcr.io/${{ lower(trim(github.repository)) }}:${{ github.sha }}
+            ghcr.io/${{ lower(trim(github.repository)) }}:${{ env.VERSION }}
           build-args: |
             VERSION=${{ env.VERSION }}
