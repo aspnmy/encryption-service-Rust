@@ -53,17 +53,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 构建镜像，如果是main或master分支则同时推送
-      - name: Build and push Docker image
+      # 只构建本地镜像，不推送
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          # 只有推送到main或master分支时才推送镜像
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
-          # 构建时使用本地标签，推送时使用ghcr.io标签
+          # 明确不推送镜像
+          push: false
+          # 使用localhost前缀的本地标签，避免Docker尝试推送到docker.io
           tags: |
-            encryption-service:local
+            localhost/encryption-service:local
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           build-args: |
