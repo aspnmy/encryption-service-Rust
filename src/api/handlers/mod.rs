@@ -4,6 +4,7 @@ use serde_json;
 use crate::service::{EncryptionService, EncryptRequest, EncryptResponse, DecryptRequest, DecryptResponse, GenericResponse};
 
 /// 健康检查处理函数
+#[axum::debug_handler]
 pub async fn health_check(
     State(service): State<Arc<EncryptionService>>,
 ) -> (StatusCode, Json<GenericResponse<serde_json::Value>>) {
@@ -33,6 +34,7 @@ pub async fn health_check(
 }
 
 /// 加密处理函数
+#[axum::debug_handler]
 pub async fn encrypt(
     State(service): State<Arc<EncryptionService>>,
     Json(request): Json<EncryptRequest>,
@@ -58,6 +60,7 @@ pub async fn encrypt(
 }
 
 /// 解密处理函数
+#[axum::debug_handler]
 pub async fn decrypt(
     State(service): State<Arc<EncryptionService>>,
     Json(request): Json<DecryptRequest>,
@@ -83,6 +86,7 @@ pub async fn decrypt(
 }
 
 /// 批量加密处理函数
+#[axum::debug_handler]
 pub async fn batch_encrypt(
     State(service): State<Arc<EncryptionService>>,
     Json(requests): Json<Vec<EncryptRequest>>,
@@ -108,6 +112,7 @@ pub async fn batch_encrypt(
 }
 
 /// 批量解密处理函数
+#[axum::debug_handler]
 pub async fn batch_decrypt(
     State(service): State<Arc<EncryptionService>>,
     Json(requests): Json<Vec<DecryptRequest>>,

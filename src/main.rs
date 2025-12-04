@@ -14,6 +14,8 @@ mod crypto;
 mod service;
 mod api;
 mod scheduler;
+mod cache;
+mod test_instance;
 
 #[tokio::main]
 async fn main() {
@@ -36,6 +38,12 @@ async fn main() {
     
     // 启动调度器健康检查
     encryption_service.get_scheduler().start_health_check().await;
+    
+    // 启动Test实例管理器定期检查
+    encryption_service.get_test_instance_manager().start_periodic_check().await;
+    
+    // 启动缓存管理器定期清理任务
+    encryption_service.get_cache_manager().start_cleanup_task().await;
     
     // 构建路由
     let app = create_router(
