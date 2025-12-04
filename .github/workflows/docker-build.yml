@@ -39,8 +39,10 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "VERSION=$(date +%Y%m%d)-${{ github.sha:0:8 }}" >> $GITHUB_ENV
+          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-6)
+          echo "VERSION=$(date +%Y%m%d)-$SHA_SHORT" >> $GITHUB_ENV
           echo "LOWERCASE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_ENV
 
       # 只有推送到main或master分支时才登录并推送镜像
       - name: Login to GitHub Container Registry
@@ -63,7 +65,7 @@ jobs:
           tags: |
             encryption-service:latest
             ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:latest', env.LOWERCASE_REPOSITORY) }}
-            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, github.sha) }}
+            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.SHA_SHORT) }}
             ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.VERSION) }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
