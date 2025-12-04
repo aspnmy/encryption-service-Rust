@@ -63,8 +63,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set VERSION environment variable
-        run: echo "VERSION=$(date +%Y%m%d)-${{ github.sha }}" >> $GITHUB_ENV
+      - name: Set environment variables
+        run: |
+          echo "VERSION=$(date +%Y%m%d)-${{ github.sha }}" >> $GITHUB_ENV
+          echo "LOWERCASE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Build and push Docker image to ghcr.io
         uses: docker/build-push-action@v5
@@ -73,8 +75,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ lower(trim(github.repository)) }}:latest
-            ghcr.io/${{ lower(trim(github.repository)) }}:${{ github.sha }}
-            ghcr.io/${{ lower(trim(github.repository)) }}:${{ env.VERSION }}
+            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:latest
+            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:${{ github.sha }}
+            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:${{ env.VERSION }}
           build-args: |
             VERSION=${{ env.VERSION }}
