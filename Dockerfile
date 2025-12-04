@@ -10,6 +10,14 @@ COPY Cargo.toml Cargo.lock ./
 # 创建一个虚拟的src目录和main.rs文件，用于缓存依赖
 RUN mkdir -p src && echo 'fn main() {}' > src/main.rs
 
+# 在构建阶段设置必要的环境变量
+# 实际拉取的时候 会覆盖这些环境变量更改成实际的项目
+ENV RUST_LOG=info
+ENV CRUD_API_BACKEND_TYPE=read_write_split
+ENV CRUD_API_WRITE_INSTANCE_URL=http://localhost:8000
+ENV CRUD_API_READ_INSTANCE_URL=http://localhost:8000
+ENV JWT_SECRET=a1v0t7BjeTPKjQgeQMummRWEfJmc8sY1
+
 # 构建依赖
 RUN cargo build --release
 
