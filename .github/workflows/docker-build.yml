@@ -6,11 +6,14 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docker-compose.yml'
+      - 'LICENSE'
   pull_request:
     branches: [ main, master, dev_rust ]
     paths-ignore:
       - '**/*.md'
       - 'docker-compose.yml'
+      - 'LICENSE'
+      - '**/*.lock'
 
 jobs:
   build-and-push:
@@ -36,7 +39,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "VERSION=$(date +%Y%m%d)-${{ github.sha }}" >> $GITHUB_ENV
+          echo "VERSION=$(date +%Y%m%d)-${{ github.sha:0:8 }}" >> $GITHUB_ENV
           echo "LOWERCASE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       # 只有推送到main或master分支时才登录并推送镜像
