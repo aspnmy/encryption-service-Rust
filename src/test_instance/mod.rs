@@ -12,6 +12,7 @@ use crate::cache::CacheManager;
 #[derive(Debug, Clone, PartialEq)]
 pub enum TestInstanceState {
     /// 未创建
+    #[allow(dead_code)]
     NotCreated,
     /// 已创建
     Created,
@@ -23,12 +24,16 @@ pub enum TestInstanceState {
 #[derive(Debug, Clone)]
 pub struct TestInstanceConfig {
     /// 实例ID
+    #[allow(dead_code)]
     pub id: String,
     /// 实例URL
+    #[allow(dead_code)]
     pub url: String,
     /// 数据库前缀
+    #[allow(dead_code)]
     pub db_prefix: String,
     /// 创建时间（秒）
+    #[allow(dead_code)]
     pub created_at: u64,
     /// 过期时间（秒）
     pub expired_at: u64,
@@ -40,6 +45,7 @@ pub struct TestInstanceConfig {
 #[derive(Debug, Clone)]
 pub struct TestInstanceManager {
     /// 配置
+    #[allow(dead_code)]
     config: Arc<AppConfig>,
     /// HTTP客户端
     http_client: Client,

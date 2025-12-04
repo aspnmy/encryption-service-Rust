@@ -16,6 +16,7 @@ mod api;
 mod scheduler;
 mod cache;
 mod test_instance;
+mod test_config;
 
 #[tokio::main]
 async fn main() {
@@ -24,6 +25,9 @@ async fn main() {
     
     // 初始化日志
     tracing_subscriber::fmt::init();
+    
+    // 测试配置加载
+    test_config::test_config_loading();
     
     // 加载配置
     let config = AppConfig::from_env().expect("无法加载配置");

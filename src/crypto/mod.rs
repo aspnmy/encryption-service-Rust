@@ -11,6 +11,7 @@ use std::convert::TryInto;
 pub struct EncryptionUtils {
     algorithm: String,
     key_length: u32,
+    #[allow(dead_code)]
     iterations: u32,
     salt: Vec<u8>,
 }

@@ -141,45 +141,27 @@ impl CrudApiScheduler {
 
     /// 根据请求类型选择实例
     pub fn select_instance(&self, is_write_operation: bool) -> Result<CrudApiInstance> {
-        let strategy = &self.config.crud_api.strategy;
+        // 统一调度逻辑：所有模式都使用相同的逻辑
+        let instance_type = if is_write_operation { "write" } else { "read" };
+        let healthy_instances = self.get_healthy_instances(instance_type);
         
-        match strategy {
-            SchedulerStrategy::Single => {
-                // 单实例模式直接返回第一个健康实例
-                let healthy_instances = self.get_healthy_instances("mixed");
-                healthy_instances.first().cloned()
-                    .ok_or_else(|| anyhow::anyhow!("没有健康的CRUD API实例可用"))
-            },
-            SchedulerStrategy::ReadWriteSplit => {
-                // 读写分离模式
-                if is_write_operation {
-                    // 写操作选择写实例或混合实例
-                    let healthy_write_instances = self.get_healthy_instances("write");
-                    healthy_write_instances.first().cloned()
-                        .ok_or_else(|| anyhow::anyhow!("没有健康的写实例可用"))
-                } else {
-                    // 读操作选择读实例或混合实例
-                    let healthy_read_instances = self.get_healthy_instances("read");
-                    healthy_read_instances.first().cloned()
-                        .ok_or_else(|| anyhow::anyhow!("没有健康的读实例可用"))
-                }
-            },
-            SchedulerStrategy::LoadBalance => {
-                // 负载均衡模式
-                let instance_type = if is_write_operation { "write" } else { "read" };
-                let healthy_instances = self.get_healthy_instances(instance_type);
-                
-                if healthy_instances.is_empty() {
-                    return Err(anyhow::anyhow!("没有健康的{}实例可用", instance_type));
-                }
-                
-                // 简单轮询负载均衡
-                let mut counter = self.load_balance_counter.write().unwrap();
-                let index = *counter % healthy_instances.len();
-                *counter = *counter + 1;
-                
-                Ok(healthy_instances[index].clone())
-            },
+        if healthy_instances.is_empty() {
+            return Err(anyhow::anyhow!("没有健康的{}实例可用", instance_type));
+        }
+        
+        // 检查是否为单实例模式
+        let is_single_mode = self.config.crud_api.strategy == SchedulerStrategy::Single;
+        
+        if is_single_mode {
+            // 单实例模式：直接返回第一个健康实例
+            Ok(healthy_instances.first().cloned().unwrap())
+        } else {
+            // 读写分离或负载均衡模式：使用轮询负载均衡
+            let mut counter = self.load_balance_counter.write().unwrap();
+            let index = *counter % healthy_instances.len();
+            *counter = *counter + 1;
+            
+            Ok(healthy_instances[index].clone())
         }
     }
 

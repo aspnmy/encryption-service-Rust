@@ -1,0 +1,81 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [ main, master, dev_rust ]
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
+    branches: [ main, master, dev_rust ]
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: encryption-service:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+
+      - name: Test with read-write split configuration
+        run: |
+          docker run --rm -e CRUD_API_BACKEND_TYPE=read_write_split -e CRUD_API_WRITE_INSTANCE_URL=http://10.168.3.165:7981 -e CRUD_API_READ_INSTANCE_URL=http://10.168.3.168:7982 -e JWT_SECRET=12345678901234567890 encryption-service:latest --version
+
+      - name: Test with single container configuration
+        run: |
+          docker run --rm -e CRUD_API_BACKEND_TYPE=single -e CRUD_API_WRITE_INSTANCE_URL=http://localhost:8000 -e JWT_SECRET=12345678901234567890 encryption-service:latest --version
+
+      - name: Test with load balance configuration
+        run: |
+          docker run --rm -e CRUD_API_BACKEND_TYPE=load_balance -e CRUD_API_INSTANCE_0_ID=instance-01 -e CRUD_API_INSTANCE_0_URL=http://localhost:8000 -e CRUD_API_INSTANCE_0_TYPE=mixed -e CRUD_API_INSTANCE_1_ID=instance-02 -e CRUD_API_INSTANCE_1_URL=http://localhost:8001 -e CRUD_API_INSTANCE_1_TYPE=mixed -e JWT_SECRET=12345678901234567890 encryption-service:latest --version
+
+  # 仅当推送到main分支时推送镜像到Docker Hub
+  push:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/encryption-service:latest
+          build-args: |
+            VERSION=${{ github.sha }}
