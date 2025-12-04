@@ -5,14 +5,19 @@ on:
     branches: [ main, master, dev_rust ]
     paths-ignore:
       - '**/*.md'
+      - 'docker-compose.yml'
   pull_request:
     branches: [ main, master, dev_rust ]
     paths-ignore:
       - '**/*.md'
+      - 'docker-compose.yml'
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -29,54 +34,35 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: false
-          tags: encryption-service:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+      - name: Set environment variables
+        run: |
+          echo "VERSION=$(date +%Y%m%d)-${{ github.sha }}" >> $GITHUB_ENV
+          echo "LOWERCASE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-  # 仅当推送到main分支时推送镜像到GitHub Container Registry
-  push:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    needs: build
-
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+      # 只有推送到main或master分支时才登录并推送镜像
       - name: Login to GitHub Container Registry
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set environment variables
-        run: |
-          echo "VERSION=$(date +%Y%m%d)-${{ github.sha }}" >> $GITHUB_ENV
-          echo "LOWERCASE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Build and push Docker image to ghcr.io
+      # 构建镜像，如果是main或master分支则同时推送
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          push: true
+          # 只有推送到main或master分支时才推送镜像
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+          # 构建时始终使用本地标签，推送时使用ghcr.io标签
           tags: |
-            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:latest
-            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:${{ github.sha }}
-            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:${{ env.VERSION }}
+            encryption-service:latest
+            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:latest', env.LOWERCASE_REPOSITORY) }}
+            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, github.sha) }}
+            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.VERSION) }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           build-args: |
             VERSION=${{ env.VERSION }}

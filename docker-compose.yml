@@ -62,4 +62,4 @@ services:
             - CRUD_API_WRITE_INSTANCE_URL=${CRUD_API_WRITE_INSTANCE_URL}
             - CRUD_API_READ_INSTANCE_URL=${CRUD_API_READ_INSTANCE_URL}
             - JWT_SECRET=${JWT_SECRET}
-        image: encryption-service-rust:latest
+        image: ghcr.io/aspnmy/encryption-service-rust:latest
