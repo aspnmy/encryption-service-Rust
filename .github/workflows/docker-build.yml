@@ -63,10 +63,24 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
           # 构建时使用本地标签，推送时使用ghcr.io标签
           tags: |
-            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:latest', env.LOWERCASE_REPOSITORY) }}
-            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.SHA_SHORT) }}
-            ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' && format('ghcr.io/{0}:{1}', env.LOWERCASE_REPOSITORY, env.VERSION) }}
             encryption-service:local
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          build-args: |
+            VERSION=${{ env.VERSION }}
+
+      # 仅当推送到main或master分支时才推送镜像到ghcr.io
+      - name: Push to GitHub Container Registry
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:latest
+            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:${{ env.SHA_SHORT }}
+            ghcr.io/${{ env.LOWERCASE_REPOSITORY }}:${{ env.VERSION }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           build-args: |
