@@ -3,6 +3,11 @@ name = "encryption-service"
 version = "0.1.0"
 edition = "2024"
 
+# 显式定义二进制目标，解决cargo fetch失败问题
+[[bin]]
+name = "encryption-service"
+path = "src/main.rs"
+
 [dependencies]
 axum = { version = "0.7.9", features = ["macros"] }
 tokio = { version = "1.48.0", features = ["full"] }
