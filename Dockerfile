@@ -18,8 +18,8 @@ ENV CRUD_API_WRITE_INSTANCE_URL=http://localhost:8000
 ENV CRUD_API_READ_INSTANCE_URL=http://localhost:8000
 ENV JWT_SECRET=temp_build_secret
 
-# 构建发布版本，使用--no-run参数确保只编译不运行测试
-RUN cargo build --release --no-run
+# 构建发布版本，cargo build本身只会编译代码，不会运行测试或可执行文件
+RUN cargo build --release
 
 # 使用轻量级的Alpine镜像作为最终镜像
 FROM alpine:latest
