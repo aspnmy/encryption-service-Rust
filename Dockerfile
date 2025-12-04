@@ -7,25 +7,19 @@ WORKDIR /app
 # 复制Cargo.toml和Cargo.lock
 COPY Cargo.toml Cargo.lock ./
 
-# 创建一个虚拟的src目录和main.rs文件，用于缓存依赖
-RUN mkdir -p src && echo 'fn main() {}' > src/main.rs
-
-# 在构建阶段设置必要的环境变量
-# 实际拉取的时候 会覆盖这些环境变量更改成实际的项目
-ENV RUST_LOG=info
-ENV CRUD_API_BACKEND_TYPE=read_write_split
-ENV CRUD_API_WRITE_INSTANCE_URL=http://localhost:8000
-ENV CRUD_API_READ_INSTANCE_URL=http://localhost:8000
-ENV JWT_SECRET=a1v0t7BjeTPKjQgeQMummRWEfJmc8sY1
-
-# 构建依赖
-RUN cargo build --release
+# 使用cargo fetch获取依赖，这样不需要完整的源码结构
+RUN cargo fetch
 
 # 复制实际的源代码
 COPY src ./src
 
-# 再次构建，这次会使用实际的源代码
-RUN cargo build --release
+# 在构建阶段设置必要的环境变量，但不包含敏感信息
+ENV CRUD_API_WRITE_INSTANCE_URL=http://localhost:8000
+ENV CRUD_API_READ_INSTANCE_URL=http://localhost:8000
+ENV JWT_SECRET=temp_build_secret
+
+# 构建发布版本，使用--no-run参数确保只编译不运行测试
+RUN cargo build --release --no-run
 
 # 使用轻量级的Alpine镜像作为最终镜像
 FROM alpine:latest
